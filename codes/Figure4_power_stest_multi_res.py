@@ -14,43 +14,50 @@ from csep.core.forecasts import GriddedForecast
 from csep.core.catalogs import CSEPCatalog
 from csep.utils.time_utils import decimal_year_to_utc_epoch
 import utils
+#import os
 
-n_EQs = 2**numpy.arange(6,16)
 
+
+
+
+n_EQs = 2**numpy.arange(0,10)
 
 #Store above number of earthquakes for each Grid in a Dictionary. 
-grid = {"L5":n_EQs,
-        "L6":n_EQs,
-        "L7":n_EQs,
-        "L8":n_EQs,
-        "L9":n_EQs,
-        "L10":n_EQs,
-        "L11":n_EQs
-        }
+grid = {"EQ100L11":n_EQs,
+        "EQ50L11":n_EQs,
+        "EQ25L11":n_EQs,
+        "EQ10L11":n_EQs,
+        "EQ5L11":n_EQs,
+        "EQ1L11":n_EQs }
 
-grid_fn = ['L5_power', 'L6_power', 'L7_power', 'L8_power', 'L9_power', 'L10_power', 'L11_power' ]
-#grid_fn = ['L11_power' ] #'L9_power', 'L10_power', 
 
-zoom = [5, 6, 7, 8, 9, 10, 11]
-#zoom = [11] #9, 10, 
+grid_fn = ['EQ100L11_power', 'EQ50L11_power', 'EQ25L11_power', 'EQ10L11_power', 'EQ5L11_power', 'EQ1L11_power' ]
+zoom = ['EQ100L11', 'EQ50L11', 'EQ25L11', 'EQ10L11', 'EQ5L11', 'EQ1L11']
 mbins = numpy.array([5.95])
-
 
 run_simulations_again = input('Run Simulations again (Y/y) :')
 
-if run_simulations_again =='Y' or run_simulations_again == 'y':    
-    n_cat = 2 #00   
-    for z in range(len(grid_fn)):        
+if run_simulations_again =='Y' or run_simulations_again == 'y':  
+
+    n_cat = 100
+
+    #os.mkdir('power_stest_grids_GEAR_multi_res')
+
+    for z in range(len(grid_fn)):
+
         zoom_level = zoom[z]   
         print('Grid Zoom-level :',zoom_level)
-        r = QuadtreeGrid2D.from_single_resolution(zoom_level, magnitudes=mbins)
+        #    /home/khawaja/GFZ/Testing forecasts
+        qk = numpy.genfromtxt('grids/qk_zoom='+zoom_level+'.txt', dtype='str')
+        r = QuadtreeGrid2D.from_quadkeys(qk, magnitudes=mbins)
+        #    r = QuadtreeGrid2D.from_regular_grid(zoom_level, magnitudes=mbins)
         r.get_cell_area()
-        
         power_stest_zoom = []
+        
         #get into the folder of every N earthquakes.
-        N_eqs = grid['L'+str(zoom_level)]
+        N_eqs = grid[str(zoom_level)]
         for N in N_eqs:
-            path = '../Data/catalogs_gear_forecast'+'/N='+str(N)+'/'
+            path = 'catalogs_gear_forecast'+'/N='+str(N)+'/'
             print(path)
             stest_fail_N = 0
             #Counter over the number of catalogs for every N
@@ -66,54 +73,49 @@ if run_simulations_again =='Y' or run_simulations_again == 'y':
                 dfcat['origin_time'] = dfcat.apply(lambda row: decimal_year_to_utc_epoch(row.year), axis=1) #----
                 
                 catalog = CSEPCatalog.from_dataframe(dfcat)
-                catalog.filter_spatial
-                #            print(catalog)
-                catalog.filter('latitude < ' + str(85.05))
-                catalog.filter('latitude > ' + str(-85.05))
-#                print('Events after Filter 85.05 :', catalog.event_count)
+#                print(catalog)
+                
                 #Generate uniform forecast
                 fcst = (r.cell_area/ sum(r.cell_area)) * catalog.event_count
                 fcst = fcst.reshape(-1,1)
-                forecast = GriddedForecast(data = fcst, region = r, magnitudes = mbins, name = 'L5')
+                forecast = GriddedForecast(data = fcst, region = r, magnitudes = mbins, name = zoom_level)
+#                print('sum forecast =', forecast.sum())
+                
+                
                 catalog.region = forecast.region
                 stest = spatial_test(forecast, catalog, verbose=False, seed = 123456)
-                if stest.observed_statistic < numpy.percentile(stest.test_distribution, 5):
-                        print('S-test Failed')
+                if stest.observed_statistic < numpy.percentile(stest.test_distribution, 2.5):
                         stest_fail_N = stest_fail_N+1
-            
+
             power_value_N = stest_fail_N / n_cat
             print('------Power : ', power_value_N)
-            power_stest_zoom.append(numpy.array([zoom[z], N, power_value_N]))
-#        power_stest_zoom = numpy.row_stack((power_stest_zoom, [zoom[z], N, power_value_N]))
+#            power_stest_zoom = numpy.row_stack((power_stest_zoom, [N, power_value_N]))
+            power_stest_zoom.append(numpy.array([N, power_value_N])) #zoom[z],
         numpy.savetxt('../Data/power_stest/'+grid_fn[z]+'.csv', numpy.array(power_stest_zoom), delimiter=',')
-    
+#        numpy.savetxt('power_stest_grids_GEAR_multi_res/'+grid_fn[z]+'.csv', power_stest_zoom, delimiter=',')
+ 
+#Generate spatial grid 
+
 print('--Plotting Power for Single-resolution grids')
 power = []
 for fn in grid_fn:
 #    print(fn)
     pp = numpy.loadtxt('../Data/power_stest/'+fn+'.csv', delimiter =',')
-    power.append(pp[:,2])
+    power.append(pp[:,1])
     
 power = numpy.array(power)
-col_eqs = pp[:,1].astype(int)
-row_name = numpy.array(['L5 (1024)', 'L6 (4096)', 'L7 (16384)', 'L8 (65536)', 
-                            'L9 (262144)', 'L10 (1048576)', 'L11 (4194304)'])
-    
+col_eqs = pp[:,0].astype(int)
+row_name = ['EQ100L11 (922)', 'EQ50L11 (1780)', 'EQ25L11 (3505)', 
+              'EQ10L11 (8089)', 'EQ5L11 (14782)', 'EQ1L11 (39811)']
+
 fig, ax = plt.subplots()
 ax.set_xlabel('No. of earthquakes in test catalog',fontsize=18)
-ax.set_ylabel('Number of cells in single-resolution grid', fontsize = 18)
-ax.set_title('Statistical power of Spatial-test for single-resolution grids', fontsize=22)
+ax.set_ylabel('Number of cells in multi-resolution grid', fontsize = 18)
+ax.set_title('Statistical power of Spatial-test for multi-resolution grids', fontsize=22)
 
 im, cbar = utils.heatmap(power, row_name, col_eqs, ax=ax,
                    cmap="YlGn", cbarlabel="Power")
 texts = utils.annotate_heatmap(im, valfmt="{x:.2f}")
 
 fig.set_size_inches(32, 18)
-fig.savefig('../Figures/Figure3_power_single_resolution_grids.png',  bbox_inches='tight')
-
-
-#    plt.show()
-
-    
- 
-#Generate spatial grid 
+fig.savefig('../Figures/Figure4_power_single_resolution_grids.png',  bbox_inches='tight')
