@@ -16,30 +16,26 @@ from csep.utils.time_utils import decimal_year_to_utc_epoch
 import utils
 #import os
 
-
-
-
-
 n_EQs = 2**numpy.arange(0,10)
 
 #Store above number of earthquakes for each Grid in a Dictionary. 
-grid = {"EQ100L11":n_EQs,
-        "EQ50L11":n_EQs,
-        "EQ25L11":n_EQs,
-        "EQ10L11":n_EQs,
-        "EQ5L11":n_EQs,
-        "EQ1L11":n_EQs }
+grid = {"N100L11":n_EQs,
+        "N50L11":n_EQs,
+        "N25L11":n_EQs,
+        "N10L11":n_EQs,
+        "N5L11":n_EQs,
+        "N1L11":n_EQs }
 
 
-grid_fn = ['EQ100L11_power', 'EQ50L11_power', 'EQ25L11_power', 'EQ10L11_power', 'EQ5L11_power', 'EQ1L11_power' ]
-zoom = ['EQ100L11', 'EQ50L11', 'EQ25L11', 'EQ10L11', 'EQ5L11', 'EQ1L11']
+grid_fn = ['N100L11_power', 'N50L11_power', 'N25L11_power', 'N10L11_power', 'N5L11_power', 'N1L11_power' ]
+zoom = ['N100L11', 'N50L11', 'N25L11', 'N10L11', 'N5L11', 'N1L11']
 mbins = numpy.array([5.95])
 
 run_simulations_again = input('Run Simulations again (Y/y) :')
 
 if run_simulations_again =='Y' or run_simulations_again == 'y':  
 
-    n_cat = 100
+    n_cat = 10
 
     #os.mkdir('power_stest_grids_GEAR_multi_res')
 
@@ -48,7 +44,7 @@ if run_simulations_again =='Y' or run_simulations_again == 'y':
         zoom_level = zoom[z]   
         print('Grid Zoom-level :',zoom_level)
         #    /home/khawaja/GFZ/Testing forecasts
-        qk = numpy.genfromtxt('grids/qk_zoom='+zoom_level+'.txt', dtype='str')
+        qk = numpy.genfromtxt('../Data/grids/qk_zoom='+zoom_level+'.txt', dtype='str')
         r = QuadtreeGrid2D.from_quadkeys(qk, magnitudes=mbins)
         #    r = QuadtreeGrid2D.from_regular_grid(zoom_level, magnitudes=mbins)
         r.get_cell_area()
@@ -57,7 +53,7 @@ if run_simulations_again =='Y' or run_simulations_again == 'y':
         #get into the folder of every N earthquakes.
         N_eqs = grid[str(zoom_level)]
         for N in N_eqs:
-            path = 'catalogs_gear_forecast'+'/N='+str(N)+'/'
+            path = '../Data/catalogs_gear_forecast'+'/N='+str(N)+'/'
             print(path)
             stest_fail_N = 0
             #Counter over the number of catalogs for every N
@@ -84,7 +80,7 @@ if run_simulations_again =='Y' or run_simulations_again == 'y':
                 
                 catalog.region = forecast.region
                 stest = spatial_test(forecast, catalog, verbose=False, seed = 123456)
-                if stest.observed_statistic < numpy.percentile(stest.test_distribution, 2.5):
+                if stest.observed_statistic < numpy.percentile(stest.test_distribution, 5): #2.5
                         stest_fail_N = stest_fail_N+1
 
             power_value_N = stest_fail_N / n_cat
@@ -105,8 +101,8 @@ for fn in grid_fn:
     
 power = numpy.array(power)
 col_eqs = pp[:,0].astype(int)
-row_name = ['EQ100L11 (922)', 'EQ50L11 (1780)', 'EQ25L11 (3505)', 
-              'EQ10L11 (8089)', 'EQ5L11 (14782)', 'EQ1L11 (39811)']
+row_name = ['N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3505)', 
+              'N10L11 (8089)', 'N5L11 (14782)', 'N1L11 (39811)']
 
 fig, ax = plt.subplots()
 ax.set_xlabel('No. of earthquakes in test catalog',fontsize=18)
@@ -118,4 +114,4 @@ im, cbar = utils.heatmap(power, row_name, col_eqs, ax=ax,
 texts = utils.annotate_heatmap(im, valfmt="{x:.2f}")
 
 fig.set_size_inches(32, 18)
-fig.savefig('../Figures/Figure4_power_single_resolution_grids.png',  bbox_inches='tight')
+fig.savefig('../Figures/Figure4_power_multi_resolution_grids.png',  bbox_inches='tight')
