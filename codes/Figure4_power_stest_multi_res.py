@@ -98,16 +98,16 @@ def main():
     for fn in grid_fn:
     #    print(fn)
         pp = numpy.loadtxt('../Data/power_stest/'+fn+'.csv', delimiter =',')
-        power.append(pp[:,1])
+        power.append(pp[1:,1])
         
     power = numpy.array(power)
-    col_eqs = pp[:,0].astype(int)
-    row_name = ['N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3505)', 
+    col_eqs = pp[1:,0].astype(int)
+    row_name = ['N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3502)', 
                   'N10L11 (8089)', 'N5L11 (14782)', 'N1L11 (39811)']
     
     fig, ax = plt.subplots()
-    ax.set_xlabel('Number of earthquakes in test catalog',fontsize=18)
-    ax.set_ylabel('Number of cells in multi-resolution grid', fontsize = 18)
+    ax.set_xlabel('Number of earthquakes in test catalogs',fontsize=18)
+    ax.set_ylabel('Number of cells in multi-resolution grids', fontsize = 18)
     ax.set_title('Statistical power of Spatial-test for multi-resolution grids', fontsize=22)
     
     im, cbar = utils.heatmap(power, row_name, col_eqs, ax=ax,

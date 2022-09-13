@@ -20,6 +20,7 @@ from csep.core.regions import QuadtreeGrid2D
 
 
 def main():
+    plot_normalize=False 
     mbins = numpy.array([5.95])
     catalog_name = '../Data/cat_test.csv'
     
@@ -46,8 +47,8 @@ def main():
     
     #--------------- Just Spatial counts ....
     folder = '../Data/forecasts/' #, #'forecasts/wheel/wheel_' #'forecasts/uniform/uniform_' 
-    names = ['WHEEL', 'Uniform','GEAR1', 'KJSS', 'SHIFT2F_GSRM', 'TEAM' ]     # ,  
-    result_folder = '../Data/power_stest/'
+    names = ['WHEEL', 'Uniform','GEAR1', 'KJSS', 'SHIFT_GSRM2f', 'TEAM' ]     # ,  
+    # result_folder = '../Data/power_stest/'
     
     for name in names:
         stest_all = []
@@ -83,7 +84,7 @@ def main():
         del forecast_gridded, forecast, r, data, coords
     
     #-----------Wheel Zoom = 11
-        zoom = ['11','10', '9', '8','7','6','5','N100L11', 'N50L11', 'N25L11', 'N10L11', 'N5L11', 'N1L11' ]  #
+        zoom = ['11','10', '9', '8','7','6','5','4','3','2','1','N100L11', 'N50L11', 'N25L11', 'N10L11', 'N5L11', 'N1L11' ]  #
         for z in zoom:
             print('Zoom level :',z)
             qk = numpy.genfromtxt('../Data/grids/qk_zoom='+z+'.txt', dtype = 'str')
@@ -109,13 +110,36 @@ def main():
        
             del forecast_gridded, forecast, r
         
-        plot_poisson_consistency_test(stest_all, 
-                                    plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, normalize=True, one_sided_lower=True)
-        plt.savefig(result_folder+'stest_'+name+'_normalize.png', dpi = 250)
+        ax = plot_poisson_consistency_test(stest_all, 
+                                    normalize=plot_normalize, one_sided_lower=True)
+        ax.set_title(name+': Poisson S-test')
+        # ticks = numpy.array(plt.yticks()[0])
+        labels_left = ['0.1$^\circ$x0.1$^\circ$ (6480000)', 'L11 (4194304)','L10 (1048576)', 'L9 (262144)', 'L8 (65536)',
+                    'L7 (16384)','L6 (4096)','L5 (1024)', 'L4 (256)', 'L3 (64)', 'L2 (16)', 'L1 (4)',
+                    'N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3502)',
+                    'N10L11 (8089)', 'N5L11 (14782)', 'N1L11 (39811)' ]
+        labels_left = numpy.flip(labels_left)
+        ax.set_yticklabels(labels_left )
+        ax.set_ylabel('Test grid and number of cells in each grid')
+            # plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, 
+        if plot_normalize == True:
+
+            ax.set_xlabel('Simulated log-likelihood - Observed log-likelihood')
+            ax.figure.tight_layout()
+            ax.figure.savefig(folder+'poisson_stest_'+name+'allgrids_normalize.png', dpi = 250)
+            ax.figure.savefig(folder+'poisson_stest_'+name+'allgrids_normalize.svg')
+        else:
+            ax.set_xlabel('Log-likelihood')
+            ax.figure.tight_layout()
+            ax.figure.savefig(folder+'poisson_stest_'+name+'allgrids.png', dpi = 250)
+            ax.figure.savefig(folder+'poisson_stest_'+name+'allgrids.svg')
+            
+            
+        # ax.figure.savefig(folder+'poisson_stest_'+name+'allgrids_normalize.png', dpi = 250)
     #    plot_poisson_consistency_test(stest_all, 
     #                                plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, normalize=False, one_sided_lower=True)
     #    plt.savefig(folder+name+'/stest_'+name+'.png', dpi = 250)
-        with open(result_folder+'stest_'+name+'.dat', 'wb') as f:
+        with open(folder+'poisson_stest_'+name+'allgrids.dat', 'wb') as f:
             pickle.dump(stest_all, f)
     
 if __name__ == "__main__":
@@ -124,33 +148,50 @@ if __name__ == "__main__":
     
             
     #----------------------
-    #----Load saved results and improve plots
-    #import pickle    
-    #from csep.utils.plots import plot_poisson_consistency_test
-    #import matplotlib.pyplot as plt
-    #import numpy
-    # 
-    #names = ['WHEEL', 'Uniform', 'GEAR1', 'KJSS', 'SHIFT2F_GSRM', 'TEAM' ]     # 'Uniform' wheel  'uniform', 
-    #
-    ##name = 'WHEEL'
-    #for name in names:
-    #    with open(result_folder+'/stest_'+name+'.dat', 'rb') as f:
-    #         reordered_results = pickle.load(f)
-    #    ax =  plot_poisson_consistency_test(reordered_results, 
-    #                                plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, normalize=True, one_sided_lower=True)
-    #    
-    #    ticks = numpy.array(plt.yticks()[0])
-    #    
-    ##    labels_left = ['6480000' , str(4**11), str(4**10), str(4**9), str(4**8), str(4**7), str(4**6), str(4**5), '922', '1780', '3502', '8089', '14782','39811']
-    #    labels_left = ['0.1$^\circ$x0.1$^\circ$ (6480000)', 'L11 (4194304)','L10 (1048576)', 'L9 (262144)', 'L8 (65536)','L7 (16384)','L6 (4096)','L5 (1024)',
-    #                   'N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3502)', 'N10L11 (8089)', 'N5L11 (14782)', 'N1L11 (39811)' ]
-    #  
-    #    ticks_left = numpy.flip(ticks)
-    #    plt.yticks(ticks_left,labels_left )
-    #    
-    #    plt.ylabel('Test grid and number of cells in each grid')
-    #    plt.title(name+' : S-Test')
-    #    plt.tight_layout()
-    #    plt.savefig(folder+name+'/stest_'+name+'_normalized.png', dpi = 250)
+    # # ----Load saved results and improve plots
+    # import pickle    
+    # from csep.utils.plots import plot_poisson_consistency_test
+    # import matplotlib.pyplot as plt
+    # import numpy
+    # folder = '../Data/forecasts/'
+    # plot_normalize =True
+    # names = ['WHEEL', 'Uniform', 'GEAR1', 'KJSS', 'SHIFT_GSRM2f', 'TEAM' ]     # 'Uniform' wheel  'uniform', 
     
+    # #name = 'WHEEL'
+    # for name in names:
+    #     with open(folder+'poisson_stest_'+name+'allgrids.dat', 'rb') as f:
+    #         reordered_results = pickle.load(f)
+         
+    #     #Remove the grids L4-L1.
+    #     reordered_results.pop(8)
+    #     reordered_results.pop(8)
+    #     reordered_results.pop(8)
+    #     reordered_results.pop(8)
+    
+    # # ---#Select the Grids which we want to plot:
+        
+    #     # ------select grids
+        
+    #     ax = plot_poisson_consistency_test(reordered_results, 
+    #                                 normalize=plot_normalize, one_sided_lower=True)
+    #     ax.set_title(name+': Poisson S-test')
+    #     ticks = numpy.array(plt.yticks()[0])
+
+    #     labels_left = ['0.1$^\circ$x0.1$^\circ$ (6480000)', 'L11 (4194304)','L10 (1048576)', 'L9 (262144)', 'L8 (65536)',
+    #                 'L7 (16384)','L6 (4096)','L5 (1024)', #'L4 (256)', 'L3 (64)', 'L2 (16)', 'L1 (4)',
+    #                 'N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3502)',
+    #                 'N10L11 (8089)', 'N5L11 (14782)', 'N1L11 (39811)' ]
+    #     labels_left = numpy.flip(labels_left)
+    #     ax.set_yticklabels(labels_left )
+    #     ax.set_ylabel('Test grid and number of cells in each grid')
+    #         # plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, 
+    #     if plot_normalize == True:
+
+    #         ax.set_xlabel('Simulated log-likelihood - Observed log-likelihood')
+    #         ax.figure.tight_layout()
+    #         ax.figure.savefig(folder+'poisson_stest_'+name+'_normalize.png', dpi = 250)
+    #         ax.figure.savefig(folder+'poisson_stest_'+name+'_normalize.svg')
+        
+    
+
     

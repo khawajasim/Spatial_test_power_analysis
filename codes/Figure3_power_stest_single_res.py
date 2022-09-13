@@ -101,8 +101,8 @@ def main():
                                 'L9 (262144)', 'L10 (1048576)', 'L11 (4194304)'])
         
     fig, ax = plt.subplots()
-    ax.set_xlabel('Number of earthquakes in test catalog',fontsize=18)
-    ax.set_ylabel('Number of cells in single-resolution grid', fontsize = 18)
+    ax.set_xlabel('Number of earthquakes in test catalogs',fontsize=18)
+    ax.set_ylabel('Number of cells in single-resolution grids', fontsize = 18)
     ax.set_title('Statistical power of Spatial-test for single-resolution grids', fontsize=22)
     
     im, cbar = utils.heatmap(power, row_name, col_eqs, ax=ax,

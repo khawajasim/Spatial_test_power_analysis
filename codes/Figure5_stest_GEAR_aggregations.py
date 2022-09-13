@@ -121,12 +121,12 @@ def main():
         
     power = 1 - numpy.array(power) #Calculating Pass-ratio
     col_eqs = pp[:,0].astype(int)
-    row_name = ['N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3505)', 
+    row_name = ['N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3502)', 
                   'N10L11 (8089)', 'N5L11 (14782)', 'N1L11 (39811)']
     
     fig, ax = plt.subplots()
-    ax.set_xlabel('No. of earthquakes in test catalog',fontsize=18)
-    ax.set_ylabel('Number of cells in multi-resolution grid', fontsize = 18)
+    ax.set_xlabel('Number of earthquakes in test catalogs',fontsize=18)
+    ax.set_ylabel('Number of cells in multi-resolution grids', fontsize = 18)
     ax.set_title('S-test Pass ratio for GEAR1 aggregations', fontsize=22)
     
     im, cbar = utils.heatmap(power, row_name, col_eqs, ax=ax,

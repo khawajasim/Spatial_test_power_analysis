@@ -13,6 +13,185 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from csep.models import EvaluationResult
+
+
+def _simulate_catalog(num_events, sampling_weights, sim_fore, random_numbers=None):
+    #Asim -- Modified this code to generate simulations in a way that every cell gets one earthquake. 
+    # OR in other words the number of active cells remain the same through cells.
+    # generate uniformly distributed random numbers in [0,1), this
+    if random_numbers is None:
+        random_numbers = numpy.random.rand(num_events)
+    else:
+        # TODO: ensure that random numbers are all between 0 and 1.
+        pass
+
+    # reset simulation array to zero, but don't reallocate
+    sim_fore.fill(0)
+    
+    # ---- Asim changes
+#    # find insertion points using binary search inserting to satisfy a[i-1] <= v < a[i]
+#    pnts = numpy.searchsorted(sampling_weights, random_numbers, side='right')
+#
+#    # create simulated catalog by adding to the original locations
+#    numpy.add.at(sim_fore, pnts, 1)
+#    assert sim_fore.sum() == num_events, "simulated the wrong number of events!"
+    
+    #-- Change the simulation code in such a way that every cells grid only one earthquake.
+    eqs = 0
+    while eqs < num_events:
+            random_num = numpy.random.uniform(0,1)
+            loc = numpy.searchsorted(sampling_weights, random_num)
+            if sim_fore[loc] == 0:
+                numpy.add.at(sim_fore, loc, 1)
+                eqs = eqs+1
+    
+    return sim_fore
+
+
+def binomial_joint_log_likelihood_ndarray(forecast, catalog):
+    """
+    Computes Bernoulli log-likelihood scores, assuming that earthquakes follow a binomial distribution.
+    
+    Args:
+        forecast:   Forecast of a Model (Gridded) (Numpy Array)
+                    A forecast has to be in terms of Average Number of Events in Each Bin
+                    It can be anything greater than zero
+        catalog:    Observed (Gridded) seismicity (Numpy Array):
+                    An Observation has to be Number of Events in Each Bin
+                    It has to be a either zero or positive integer only (No Floating Point)
+    """
+    #First, we mask the forecast in cells where we could find log=0.0 singularities:
+    forecast_masked = np.ma.masked_where(forecast.ravel() <= 0.0, forecast.ravel()) 
+    
+    #Then, we compute the log-likelihood of observing one or more events given a Poisson distribution, i.e., 1 - Pr(0) 
+    target_idx = numpy.nonzero(catalog.ravel())
+    y = numpy.zeros(forecast_masked.ravel().shape)
+    y[target_idx[0]] = 1
+    first_term = y * (np.log(1.0 - np.exp(-forecast_masked.ravel())))
+    
+    #Also, we estimate the log-likelihood in cells no events are observed:
+    second_term = (1-y) * (-forecast_masked.ravel().data)
+    #Finally, we sum both terms to compute the joint log-likelihood score:
+    return sum(first_term.data + second_term.data)
+
+
+def _binomial_likelihood_test(forecast_data, observed_data, num_simulations=1000, random_numbers=None, 
+                              seed=None, use_observed_counts=True, verbose=True, normalize_likelihood=False):
+    """
+    Computes binary conditional-likelihood test from CSEP using an efficient simulation based approach.
+    Args:
+        forecast_data (numpy.ndarray): nd array where [:, -1] are the magnitude bins.
+        observed_data (numpy.ndarray): same format as observation.
+        num_simulations: default number of simulations to use for likelihood based simulations
+        seed: used for reproducibility of the prng
+        random_numbers (numpy.ndarray): can supply an explicit list of random numbers, primarily used for software testing
+        use_observed_counts (bool): if true, will simulate catalogs using the observed events, if false will draw from poisson 
+        distribution
+    """
+    
+    # Array-masking that avoids log singularities:
+    forecast_data = numpy.ma.masked_where(forecast_data <= 0.0, forecast_data) 
+    
+    # set seed for the likelihood test
+    if seed is not None:
+        numpy.random.seed(seed)
+
+    # used to determine where simulated earthquake should be placed, by definition of cumsum these are sorted
+    sampling_weights = numpy.cumsum(forecast_data.ravel()) / numpy.sum(forecast_data)
+
+    # data structures to store results
+    sim_fore = numpy.zeros(sampling_weights.shape)
+    simulated_ll = []
+    n_obs = len(np.unique(np.nonzero(observed_data.ravel())))
+    n_fore = numpy.sum(forecast_data)
+    expected_forecast_count = int(n_obs) 
+    
+    if use_observed_counts and normalize_likelihood:
+        scale = n_obs / n_fore
+        expected_forecast_count = int(n_obs)
+        forecast_data = scale * forecast_data
+
+    # main simulation step in this loop
+    print(f'Total number of simulated EQs {int(n_obs)}')
+    for idx in range(num_simulations):
+        if use_observed_counts:
+            
+            num_events_to_simulate = int(n_obs)   #Use here sum(observed_data) and see results
+        else:
+            num_events_to_simulate = int(numpy.random.poisson(expected_forecast_count))
+    
+        if random_numbers is None:
+            sim_fore = _simulate_catalog(num_events_to_simulate, sampling_weights, sim_fore)
+        else:
+            sim_fore = _simulate_catalog(num_events_to_simulate, sampling_weights, sim_fore,
+                                         random_numbers=random_numbers[idx,:])
+
+    
+        # compute joint log-likelihood
+        current_ll = binomial_joint_log_likelihood_ndarray(forecast_data.data, sim_fore)
+        
+        # append to list of simulated log-likelihoods
+        simulated_ll.append(current_ll)
+
+        # just be verbose
+        if verbose:
+            if (idx + 1) % 100 == 0:
+                print(f'... {idx + 1} catalogs simulated.')
+                target_idx = numpy.nonzero(observed_data.ravel())
+
+    # observed joint log-likelihood
+    obs_ll = binomial_joint_log_likelihood_ndarray(forecast_data.data, observed_data)
+        
+    # quantile score
+    qs = numpy.sum(simulated_ll <= obs_ll) / num_simulations
+
+    # float, float, list
+    return qs, obs_ll, simulated_ll
+
+
+def binomial_spatial_test(gridded_forecast, observed_catalog, num_simulations=1000, seed=None, random_numbers=None, verbose=False):
+    """
+    Performs the binary spatial test on the Forecast using the Observed Catalogs.
+    Note: The forecast and the observations should be scaled to the same time period before calling this function. This increases
+    transparency as no assumptions are being made about the length of the forecasts. This is particularly important for
+    gridded forecasts that supply their forecasts as rates.
+    Args:
+        gridded_forecast: csep.core.forecasts.GriddedForecast
+        observed_catalog: csep.core.catalogs.Catalog
+        num_simulations (int): number of simulations used to compute the quantile score
+        seed (int): used fore reproducibility, and testing
+        random_numbers (numpy.ndarray): random numbers used to override the random number generation. injection point for testing.
+    Returns:
+        evaluation_result: csep.core.evaluations.EvaluationResult
+    """
+
+    # grid catalog onto spatial grid
+    gridded_catalog_data = observed_catalog.spatial_counts()
+
+    # simply call likelihood test on catalog data and forecast
+    qs, obs_ll, simulated_ll = _binomial_likelihood_test(gridded_forecast.spatial_counts(), gridded_catalog_data,
+                                                        num_simulations=num_simulations,
+                                                        seed=seed,
+                                                        random_numbers=random_numbers,
+                                                        use_observed_counts=True,
+                                                        verbose=verbose, normalize_likelihood=True)
+
+    
+# populate result data structure
+    result = EvaluationResult()
+    result.test_distribution = simulated_ll
+    result.name = 'Binary S-Test'
+    result.observed_statistic = obs_ll
+    result.quantile = qs
+    result.sim_name = gridded_forecast.name
+    result.obs_name = observed_catalog.name
+    result.status = 'normal'
+    try:
+        result.min_mw = numpy.min(gridded_forecast.magnitudes)
+    except AttributeError:
+        result.min_mw = -1
+    return result   
 
 
 def heatmap(data, row_labels, col_labels, ax=None,
