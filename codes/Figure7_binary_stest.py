@@ -86,7 +86,8 @@ def main():
         del forecast_gridded, forecast, r, data, coords
     
     #-----------Wheel Zoom = 11
-        zoom = ['11','10', '9', '8','7','6','5','4','3','2','1','EQ100L11', 'EQ50L11', 'EQ25L11', 'EQ10L11', 'EQ5L11', 'EQ1L11' ]  #
+        zoom = ['11','10', '9', '8','7','6','5','4','3','2','1','N100L11', 'N50L11', 'N25L11', 'N10L11', 'N5L11', 'N1L11' ] #
+        # zoom = ['5','4']
         for z in zoom:
             print('Zoom level :',z)
             qk = numpy.genfromtxt('../Data/grids/qk_zoom='+z+'.txt', dtype = 'str')
@@ -116,7 +117,7 @@ def main():
                                     normalize=plot_normalize, one_sided_lower=True)
         ax.set_title(name+': Binary S-test')
         
-        # ticks = numpy.array(plt.yticks()[0])
+        ticks = numpy.array(plt.yticks()[0])
         labels_left = ['0.1$^\circ$x0.1$^\circ$ (6480000)', 'L11 (4194304)','L10 (1048576)', 'L9 (262144)', 'L8 (65536)',
                     'L7 (16384)','L6 (4096)','L5 (1024)', 'L4 (256)', 'L3 (64)', 'L2 (16)', 'L1 (4)',
                     'N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3502)',
@@ -137,7 +138,7 @@ def main():
             ax.figure.savefig(folder+'binary_stest_'+name+'allgrids.svg')
             
         # with open(folder+name+'/binary_stest_'+name+'.dat', 'wb') as f:
-        with open(folder+name+'/binary_stest_'+name+'.dat', 'wb') as f:
+        with open(folder+'binary_stest_'+name+'.dat', 'wb') as f:
             pickle.dump(binary_stest_all, f)
 
 if __name__ == "__main__":
