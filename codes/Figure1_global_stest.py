@@ -19,7 +19,7 @@ def main():
     mbins = numpy.array([5.95])
     stest_all = []
     folder = '../Data/forecasts/' #, #'forecasts/wheel/wheel_' #'forecasts/uniform/uniform_' 
-    names = ['KJSS', 'SHIFT2F_GSRM', 'WHEEL', 'TEAM', 'GEAR1', 'Uniform']     # 'Uniform' 
+    names = ['KJSS', 'SHIFT_GSRM2f', 'WHEEL', 'TEAM', 'GEAR1', 'Uniform']     # 'Uniform' 
     #names = ['uniform']
     
     
@@ -110,3 +110,29 @@ def main():
     #
 if __name__ == "__main__":
     main()
+    
+
+import numpy
+import pickle
+import pandas
+# from csep.core.regions import CartesianGrid2D
+# from csep.core.forecasts import GriddedForecast
+# from csep.core.catalogs import CSEPCatalog
+# from csep.utils.time_utils import decimal_year_to_utc_epoch
+# from csep.core.poisson_evaluations import spatial_test
+from csep.utils.plots import plot_poisson_consistency_test
+folder = '../Data/forecasts/'
+    
+#-- For Overall global test results
+with open(folder+'stest_01_all.dat', 'rb') as f:
+          reordered_results = pickle.load(f)
+reordered_results[1].sim_name = 'SHIFT_GSRM2f'
+ax =  plot_poisson_consistency_test(reordered_results, 
+                                plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, normalize=True, one_sided_lower=True)
+
+ax.set_title('Global forecast experiment: S-test', fontsize=14)
+ax.set_xlabel('Simulated log-likelihood - Observed log-likelihood')
+    # fig.set_size_inches(32, 18)
+ax.figure.tight_layout()
+ax.figure.savefig('../Figures/Figure1b_global_forecast_experiment.png', dpi = 200)
+    

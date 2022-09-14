@@ -50,8 +50,8 @@ def main():
     
     #--------------- Just Spatial counts ....
     folder = '../Data/forecasts/' #, #'forecasts/wheel/wheel_' #'forecasts/uniform/uniform_' 
-    names = ['Uniform', 'GEAR1', 'KJSS', 'SHIFT_GSRM2f', 'TEAM' ]     # 'Uniform' wheel  'uniform', 'WHEEL', 
-    
+    # names = ['Uniform', 'GEAR1', 'KJSS', 'SHIFT_GSRM2f', 'TEAM' ]     # 'Uniform' wheel  'uniform', 'WHEEL', 
+    names = ['WHEEL']
     for name in names:
         binary_stest_all = []
        
@@ -162,6 +162,12 @@ if __name__ == "__main__":
 #     with open(folder+name+'/binary_stest_'+name+'.dat', 'rb') as f:
 #         reordered_results = pickle.load(f)
 
+
+# ----Load saved results and improve plots
+# import pickle    
+# from csep.utils.plots import plot_poisson_consistency_test
+# import matplotlib.pyplot as plt
+# import numpy
 #-----Select the grids we want to plot
 
 # plot_normalize = True
@@ -191,49 +197,47 @@ if __name__ == "__main__":
 
 # ---------
 
-
-
-#     ax =  plot_poisson_consistency_test(reordered_results, 
-#                                 plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, normalize=True, one_sided_lower=True)
+#   ----------------------
+#     # ----Load saved results and improve plots
+#     import pickle    
+#     from csep.utils.plots import plot_poisson_consistency_test
+#     import matplotlib.pyplot as plt
+#     import numpy
+#     folder = '../Data/forecasts/'
+#     plot_normalize =True
+#     names = ['Uniform', 'GEAR1', 'KJSS', 'SHIFT_GSRM2f', 'TEAM', 'WHEEL' ]     # 'Uniform' wheel  'uniform', 
     
-#     ticks = numpy.array(plt.yticks()[0])
+#     #name = 'WHEEL'
+#     for name in names:
+#         with open(folder+'binary_stest_'+name+'.dat', 'rb') as f:  #binary_stest_WHEEL.dat
+#             reordered_results = pickle.load(f)
+         
+#         #Remove the grids L4-L1.
+#         reordered_results.pop(8)
+#         reordered_results.pop(8)
+#         reordered_results.pop(8)
+#         reordered_results.pop(8)
     
-#     labels_left = ['0.1$^\circ$x0.1$^\circ$ (6480000)', 'L11 (4194304)','L10 (1048576)', 'L9 (262144)', 'L8 (65536)',
-#                    'L7 (16384)','L6 (4096)','L5 (1024)','N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3502)',
-#                    'N10L11 (8089)', 'N5L11 (14782)', 'N1L11 (39811)' ]
-  
-#     ticks_left = numpy.flip(ticks)
-#     plt.yticks(ticks_left,labels_left )
-    
-#     plt.ylabel('Test grid and number of cells in each grid')
-#     if name == 'TEAMr':
-#         plt.title('TEAM : S-Test')
-#     else:
-#         plt.title(name+' : S-Test')
-#     plt.tight_layout()
-#     plt.savefig(folder+name+'/binary_stest_modified'+name+'.png', dpi = 250)
-    
-    
-#-- For Overall global test results
-# with open('forecasts/stest_01_all.dat', 'rb') as f:
-#          reordered_results = pickle.load(f)
-# reordered_results[5].sim_name = 'Uniform'
-# reordered_results[2].sim_name = 'WHEEL'
-# reordered_results[3].sim_name = 'TEAM'
-# ax =  plot_poisson_consistency_test(reordered_results, 
-#                                 plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, normalize=True, one_sided_lower=True)
-# plt.title('Global Forecast Experiment: S-Test')
+#     # ---#Select the Grids which we want to plot:
+        
+#         # ------select grids
+        
+#         ax = plot_poisson_consistency_test(reordered_results, 
+#                                     normalize=plot_normalize, one_sided_lower=True)
+#         ax.set_title(name+': Binary S-test')
+#         ticks = numpy.array(plt.yticks()[0])
 
+#         labels_left = ['0.1$^\circ$x0.1$^\circ$ (6480000)', 'L11 (4194304)','L10 (1048576)', 'L9 (262144)', 'L8 (65536)',
+#                     'L7 (16384)','L6 (4096)','L5 (1024)', #'L4 (256)', 'L3 (64)', 'L2 (16)', 'L1 (4)',
+#                     'N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3502)',
+#                     'N10L11 (8089)', 'N5L11 (14782)', 'N1L11 (39811)' ]
+#         labels_left = numpy.flip(labels_left)
+#         ax.set_yticklabels(labels_left )
+#         ax.set_ylabel('Test grid and number of cells in each grid')
+#             # plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, 
+#         if plot_normalize == True:
 
-
-
-#plt.savefig('forecasts/stest_all_normalize.png', dpi = 250)
-#
-#ax =  plot_poisson_consistency_test(reordered_results, 
-#                                plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, normalize=False, one_sided_lower=True)
-#plt.title('Global Forecast Experiment: S-Test')
-#plt.savefig('forecasts/stest_all.png', dpi = 250)
-#
-#
-#with open('forecasts/stest_01_all.dat', 'wb') as f:
-#        pickle.dump(reordered_results, f)
+#             ax.set_xlabel('Simulated log-likelihood - Observed log-likelihood')
+#             ax.figure.tight_layout()
+#             ax.figure.savefig(folder+'binary_stest_'+name+'_normalize.png', dpi = 250)
+#             ax.figure.savefig(folder+'binary_stest_'+name+'_normalize.svg')
