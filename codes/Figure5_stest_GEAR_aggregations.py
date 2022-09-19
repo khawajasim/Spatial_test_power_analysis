@@ -117,10 +117,10 @@ def main():
     for name in names:
     #    print(fn)
         pp = numpy.loadtxt('../Data/power_stest/GEAR_aggregation_zoom='+name+'.csv', delimiter =',')
-        power.append(pp[:,1])
+        power.append(pp[1:,1])
         
     power = 1 - numpy.array(power) #Calculating Pass-ratio
-    col_eqs = pp[:,0].astype(int)
+    col_eqs = pp[1:,0].astype(int)
     row_name = ['N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3502)', 
                   'N10L11 (8089)', 'N5L11 (14782)', 'N1L11 (39811)']
     
