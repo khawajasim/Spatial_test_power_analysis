@@ -123,7 +123,8 @@ def calculate_power(model0, model1, N, Nsim):
 def main():
     # -- Parameters
     mu = 0.0
-    sigma = 1#[1] # Array, in case if running code of multiple sigma.
+    sigma = 2
+    #1 # Array, in case if running code of multiple sigma.
     # Use Z as three times of sigma to Cover 99.7% of the data it has to offer.
     Nc2_all = Nc2_all = np.arange(1,51,1)
     Neqs_fix = 10 #Use this number of earthquakes to plot trend (Frame c)
@@ -144,7 +145,7 @@ def main():
             print('Uniform grid size :', len(uniformbinedges)-1) 
             densitybinedges = gaussian_binedges(Z, Nc2, mu, sigma) 
             
-            outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d.out' % (Z, 2*Nc2, Nsim)
+            outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, 2*Nc2, Nsim,sigma)
             f = open(outname, 'w')
             f.write('# N    power_uniformgrid   power_densitygrid\n')
             f.close()
@@ -240,7 +241,7 @@ def main():
     power_cell = np.array([0,0,0])
     for Ncell in Ncell_all:
     #    print('---Number of Cells :', Ncell)
-        outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d.out' % (3, Ncell, Nsim) #Z=3
+        outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim,sigma) #Z=3
         data = np.loadtxt(outname, skiprows=1)
         #The below IF is for the reduced computations we did to reduce computations only to the values we need for figure.
         if data.ndim == 2:
@@ -264,7 +265,7 @@ def main():
     #Frame d ---- Neqs vs Power -- Using Fixed Ncells
     ax = plt.subplot2grid((2,2), (1,1), colspan=1, rowspan=1)
     Ncell = 2*Nc2
-    outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d.out' % (3, Ncell, Nsim) #Z=3
+    outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim, sigma) #Z=3
     data = np.loadtxt(outname, skiprows=1)
     plt.plot(data[:,0], data[:,1], c='k', label='Unifrom Grid')
     plt.plot(data[:,0], data[:,2], '--', c='b', label='Density Grid')
@@ -278,7 +279,7 @@ def main():
     ax.set_ylim(0,1.02)
     
     plt.tight_layout()
-    plt.savefig('../Figures/Figure2_stest_power_showcase.png', dpi = 400)
+    plt.savefig('../Figures/Figure2_stest_power_showcase_sigma_'+str(sigma)+'.png', dpi = 400)
     
 if __name__ == "__main__":
     main()
