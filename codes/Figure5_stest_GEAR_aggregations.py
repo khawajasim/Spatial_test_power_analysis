@@ -119,7 +119,7 @@ def main():
         pp = numpy.loadtxt('../Data/power_stest/GEAR_aggregation_zoom='+name+'.csv', delimiter =',')
         power.append(pp[1:,1])
         
-    power = 1 - numpy.array(power) #Calculating Pass-ratio
+    power = (1 - numpy.array(power)) #Calculating Pass-ratio
     col_eqs = pp[1:,0].astype(int)
     row_name = ['N100L11 (922)', 'N50L11 (1780)', 'N25L11 (3502)', 
                   'N10L11 (8089)', 'N5L11 (14782)', 'N1L11 (39811)']
@@ -131,7 +131,7 @@ def main():
     
     im, cbar = utils.heatmap(power, row_name, col_eqs, ax=ax,
                        cmap="YlGn", cbarlabel="Power")
-    texts = utils.annotate_heatmap(im, valfmt="{x:.2f}")
+    texts = utils.annotate_heatmap(im, valfmt="{x:.3f}")
     
     fig.set_size_inches(32, 18)
     ax.figure.tight_layout()
