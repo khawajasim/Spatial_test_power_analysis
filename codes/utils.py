@@ -222,7 +222,7 @@ def heatmap(data, row_labels, col_labels, ax=None,
         ax = plt.gca()
 
     # Plot the heatmap
-    im = ax.imshow(data, **kwargs)
+    im = ax.imshow(data, vmin = np.min(data), vmax = 1, **kwargs)
 
     # Create colorbar
 #    cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
@@ -230,6 +230,7 @@ def heatmap(data, row_labels, col_labels, ax=None,
     divider = make_axes_locatable(ax)  #Color bar size and split
     cax = divider.append_axes("right", size="2%", pad=0.1)  #Color bar size and split
     cbar = plt.colorbar(im, cax=cax)  #-- We can comment this line
+#    ax.set_clim(vmin=numpy.min(data), vmax=1) #-----
     cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom", fontsize=18)
 
     # We want to show all ticks...
@@ -312,7 +313,7 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             kw.update(color=textcolors[int(im.norm(data[i, j]) > threshold)])
-            text = im.axes.text(j, i, valfmt(data[i, j], None), **kw)
+            text = im.axes.text(j, i, valfmt(data[i, j], None),fontsize=16, **kw)
             texts.append(text)
 
     return texts

@@ -131,11 +131,11 @@ def main():
     
     im, cbar = utils.heatmap(power, row_name, col_eqs, ax=ax,
                        cmap="YlGn", cbarlabel="Power")
-    texts = utils.annotate_heatmap(im, valfmt="{x:.3f}")
+    texts = utils.annotate_heatmap(im, valfmt="{x:.3f}") #,textcolors=["blue", "blue"]
     
     fig.set_size_inches(32, 18)
     ax.figure.tight_layout()
-    fig.savefig('../Figures/Figure5_GEAR_aggregations_pass_ratio.png',  bbox_inches='tight')
+    fig.savefig('../Figures/Figure5_GEAR1_aggregations_pass_ratio.png',  bbox_inches='tight')
     
 if __name__ == "__main__":
     main()
