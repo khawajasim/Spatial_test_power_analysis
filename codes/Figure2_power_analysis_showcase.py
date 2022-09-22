@@ -79,11 +79,11 @@ def gaussian_binedges(Z, Nc2, mu, sig):
         mu: Mean of Gaussian Distribution
         sig: Std of Gaussian distribution
     """
-    norm = 2 * gaussweight(0, Z*sig, 0, sig)
+    norm = 2 * gaussweight(0, Z, 0, sig) #*sig
     yi = np.linspace(0, norm, Nc2+1)
     xi = erfinv(yi) * np.sqrt(2.0) * sig
     if np.isinf(xi[-1]):
-        xi[-1] = Z*sig
+        xi[-1] = Z #*sig
     res = mu + xi
     res = np.append(res, mu - xi)
     res = np.sort(np.unique(res))
@@ -123,57 +123,60 @@ def calculate_power(model0, model1, N, Nsim):
 def main():
     # -- Parameters
     mu = 0.0
-    sigma = 2
+    sigma_1 = 1
+    sigma_2=0.5
+    Nsim = 1000
+    
     #1 # Array, in case if running code of multiple sigma.
     # Use Z as three times of sigma to Cover 99.7% of the data it has to offer.
     Nc2_all = Nc2_all = np.arange(1,51,1)
     Neqs_fix = 10 #Use this number of earthquakes to plot trend (Frame c)
     Ncell_fix = 20 #Use this number of cells to plot trend (Frame d)
-    Z = 3*sigma #10.0
-    print('Standard Deviation :', sigma)
+    Z = 3 #*sigma #10.0
+    print('Standard Deviation :', sigma_1)
     gridtype = ['Uniform grid', 'Density grid']
     
     run_sim = input("Run simulation again ?  (Y / N):  ")
-    Nsim = input("Choose the number of simulations (By Default 1000): ")
-    Nsim = int(Nsim)
-    
+#    Nsim = input("Choose the number of simulations (By Default 1000): ")
+#    Nsim = int(Nsim)
+    sigmas = [sigma_1, sigma_2]
     if run_sim == 'Y' or run_sim == 'y':   
-        
-        for Nc2 in Nc2_all:
-            print('-----Number of Cells = ', 2*Nc2)
-            uniformbinedges = np.linspace(-Z, Z, 2 * Nc2 + 1) 
-            print('Uniform grid size :', len(uniformbinedges)-1) 
-            densitybinedges = gaussian_binedges(Z, Nc2, mu, sigma) 
-            
-            outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, 2*Nc2, Nsim,sigma)
-            f = open(outname, 'w')
-            f.write('# N    power_uniformgrid   power_densitygrid\n')
-            f.close()
-            #Below conditional Nc2 assignment is to reduce time for unnecessary calculation.
-            #Doing only those calculations, that we want to show in figure. 
-            if Nc2 ==  (Ncell_fix/2):  #10: #10*2= Ncells
-                Neqs = np.arange(1,101,1) 
-            else:
-                Neqs = [Neqs_fix]
-    #        print('Total Earthquakes :', Neqs)
-            for N in  Neqs: 
-    #            print('Number of Cells :', Nc2)
-    #            print('---EQS :,', N)
-                for ng, grid in enumerate(gridtype):
-                    if grid == 'Uniform grid':
-                        
-                        model0 = uniformmodel(N, uniformbinedges)
-                        model1 = gaussmodel(N, uniformbinedges, mu, sigma)
-                        poweruniform = calculate_power(model0, model1, N, Nsim)
-                    elif grid == 'Density grid':
-                        model0 = uniformmodel(N, densitybinedges)
-                        model1 = gaussmodel(N, densitybinedges, mu, sigma)
-                        powerdensity = calculate_power(model0, model1, N, Nsim)
-                print('Ncell=%d  N=%d  power(uniformgrid)=%f  power(densitygrid)=%f' % (2*Nc2,  N, poweruniform, powerdensity))
-                f = open(outname, 'a')
-                f.write('%d\t%f\t%f\n' % (N, poweruniform, powerdensity))
+        for sigma in sigmas:
+            for Nc2 in Nc2_all:
+                print('-----Number of Cells = ', 2*Nc2)
+                uniformbinedges = np.linspace(-Z, Z, 2 * Nc2 + 1) 
+                print('Uniform grid size :', len(uniformbinedges)-1) 
+                densitybinedges = gaussian_binedges(Z, Nc2, mu, sigma_1) 
+                
+                outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, 2*Nc2, Nsim,sigma)
+                f = open(outname, 'w')
+                f.write('# N    power_uniformgrid   power_densitygrid\n')
                 f.close()
-            print('\n\t OUTPUT: %s\n' % (outname))
+                #Below conditional Nc2 assignment is to reduce time for unnecessary calculation.
+                #Doing only those calculations, that we want to show in figure. 
+                if Nc2 ==  (Ncell_fix/2):  #10: #10*2= Ncells
+                    Neqs = np.arange(1,101,1) 
+                else:
+                    Neqs = [Neqs_fix]
+        #        print('Total Earthquakes :', Neqs)
+                for N in  Neqs: 
+        #            print('Number of Cells :', Nc2)
+        #            print('---EQS :,', N)
+                    for ng, grid in enumerate(gridtype):
+                        if grid == 'Uniform grid':
+                            
+                            model0 = uniformmodel(N, uniformbinedges)
+                            model1 = gaussmodel(N, uniformbinedges, mu, sigma)
+                            poweruniform = calculate_power(model0, model1, N, Nsim)
+                        elif grid == 'Density grid':
+                            model0 = uniformmodel(N, densitybinedges)
+                            model1 = gaussmodel(N, densitybinedges, mu, sigma)
+                            powerdensity = calculate_power(model0, model1, N, Nsim)
+                    print('Ncell=%d  N=%d  power(uniformgrid)=%f  power(densitygrid)=%f' % (2*Nc2,  N, poweruniform, powerdensity))
+                    f = open(outname, 'a')
+                    f.write('%d\t%f\t%f\n' % (N, poweruniform, powerdensity))
+                    f.close()
+                print('\n\t OUTPUT: %s\n' % (outname))
     
     
     
@@ -183,13 +186,13 @@ def main():
     plt.rc('font', family='sans-serif')
     plt.rc('legend', fontsize=14)
     plt.rc('axes', labelsize=16)
-    fig = plt.figure(1, figsize=(15, 10))
+    fig = plt.figure(1, figsize=(18, 10))
     plt.subplots_adjust(hspace=0.3, wspace=0.3)
     
     Nc2 = int(Ncell_fix/2) # 10
     Neqs = Neqs_fix #Earthquakes
-    uniformbinedges = np.linspace(-Z*sigma, Z*sigma, 2 * Nc2 + 1)
-    densitybinedges = gaussian_binedges(Z, Nc2, mu, sigma)
+    uniformbinedges = np.linspace(-Z, Z, 2 * Nc2 + 1) #*sigma
+    densitybinedges = gaussian_binedges(Z, Nc2, mu, sigma_1)
     
     #Frame a and b - Demonstrate single and multi-resolution grids 
     for ng, grid in enumerate(gridtype):
@@ -208,12 +211,12 @@ def main():
             
         xb = 0.5 * (binedges[:-1] + binedges[1:])
         model0 = uniformmodel(Neqs, binedges)
-        model1 = gaussmodel(Neqs, binedges, mu, sigma)
+        model1 = gaussmodel(Neqs, binedges, mu, sigma_1)
         nobs = simulation(model1, Neqs)     #Using Gaussian model to generate Observed gridded catalog
         plt.plot(xb, model0, c='k', label='Uniform model')
-        plt.plot(xb, model1, '--', c='b', label='Gaussian model')
-        plt.scatter(xb, nobs, alpha=0.5, label='Test Catalog ($\mathregular{N_{eqs}=%d}$)' % (Neqs))
-        plt.xlim(-Z*sigma, Z*sigma)
+        plt.plot(xb, model1, '--', c='b', label='Gaussian model ($\sigma=%.1f$)'%(sigma_1))
+        plt.scatter(xb, nobs, alpha=0.5, label='Test Catalog ($\mathregular{N_{eq}=%d}$)' % (Neqs))
+        plt.xlim(-Z, Z) #*sigma
         plt.xlabel('Bin mid-point position')
         plt.ylabel('Events per bin')
         plt.title(titlename)
@@ -239,24 +242,39 @@ def main():
     ax = plt.subplot2grid((2,2), (1,0), colspan=1, rowspan=1)
     Ncell_all = 2*np.arange(1,51,1)
     power_cell = np.array([0,0,0])
+    power_cell_2 = np.array([0,0,0])
     for Ncell in Ncell_all:
     #    print('---Number of Cells :', Ncell)
-        outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim,sigma) #Z=3
+        outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim,sigma_1) #Z=3
         data = np.loadtxt(outname, skiprows=1)
         #The below IF is for the reduced computations we did to reduce computations only to the values we need for figure.
         if data.ndim == 2:
             power_cell = np.row_stack((power_cell,data[data[:,0]==Neqs]))
         else:
             power_cell = np.row_stack((power_cell,data))
+    
+        #Data 2---
+        outname_2 = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim,sigma_2) #Z=3
+        data_2 = np.loadtxt(outname_2, skiprows=1)
+        #The below IF is for the reduced computations we did to reduce computations only to the values we need for figure.
+        if data_2.ndim == 2:
+            power_cell_2 = np.row_stack((power_cell_2,data_2[data_2[:,0]==Neqs]))
+        else:
+            power_cell_2 = np.row_stack((power_cell_2,data_2))
+    
+    
+    
     power_cell = power_cell[1:]
+    power_cell_2 = power_cell_2[1:]
     
     plt.plot(Ncell_all, power_cell[:,1], c='k', label='Uniform Grid')
-    plt.plot(Ncell_all, power_cell[:,2], '--', c='b', label='Density Grid')
+    plt.plot(Ncell_all, power_cell[:,2], '--', c='b', label='Density Grid ($\sigma=%.1f$)'% (sigma_1))
+    plt.plot(Ncell_all, power_cell_2[:,2], ':', c='b', label='Density Grid ($\sigma=%.1f$)'% (sigma_2))
     ax.set_xscale('log', basex=2)
     plt.legend(fontsize=12,loc='center right')
-    plt.xlabel('$\mathrm{N_{cells}}$') #, fontsize = 14
+    plt.xlabel('$\mathrm{N_{cell}}$') #, fontsize = 14
     plt.ylabel('Power', fontsize = 14)  #, 
-    plt.title('$\mathregular{N_{cells}}$ vs Power ($\mathregular{N_{eqs}=%.0f}$)' % (Neqs)) #, fontsize = 14
+    plt.title('$\mathregular{N_{cell}}$ vs Power ($\mathregular{N_{eq}=%.0f}$)' % (Neqs)) #, fontsize = 14
     plt.xticks([ 2,  4,  8, 16, 32, 64],[2,  4,  8, 16, 32, 64])
     ax.text(2,0.95, '(c)', fontsize=16)
     ax.set_ylim(0,1.02)
@@ -265,21 +283,28 @@ def main():
     #Frame d ---- Neqs vs Power -- Using Fixed Ncells
     ax = plt.subplot2grid((2,2), (1,1), colspan=1, rowspan=1)
     Ncell = 2*Nc2
-    outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim, sigma) #Z=3
+    outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell,Nsim, sigma_1) #Z=3
     data = np.loadtxt(outname, skiprows=1)
+    
+    outname_2 = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim, sigma_2) #Z=3
+    data_2 = np.loadtxt(outname_2, skiprows=1)
+    
     plt.plot(data[:,0], data[:,1], c='k', label='Unifrom Grid')
-    plt.plot(data[:,0], data[:,2], '--', c='b', label='Density Grid')
+    plt.plot(data[:,0], data[:,2], '--', c='b', label='Density Grid ($\sigma=%.1f$)'% (sigma_1))
+    plt.plot(data_2[:,0], data_2[:,2], ':', c='b', label='Density Grid ($\sigma=%.1f$)'% (sigma_2))
     ax.set_xscale('log', basex=2)
     #plt.legend()
-    plt.xlabel('$\mathrm{N_{eqs}}$', fontsize = 16) #, 
+    plt.xlabel('$\mathrm{N_{eq}}$', fontsize = 16) #, 
     plt.ylabel('Power') #, fontsize = 14
-    plt.title('$\mathregular{N_{eqs}}$ vs Power ($\mathregular{N_{cell}=%.0f}$)' % (Ncell)) #, fontsize = 14
+    plt.title('$\mathregular{N_{eq}}$ vs Power ($\mathregular{N_{cell}=%.0f}$)' % (Ncell)) #, fontsize = 14
     plt.xticks([ 1,  2,  4,  8, 16, 32, 64],[ 1,  2,  4,  8, 16, 32, 64])
     ax.text(1,0.95, '(d)', fontsize=16)
     ax.set_ylim(0,1.02)
     
+    
     plt.tight_layout()
-    plt.savefig('../Figures/Figure2_stest_power_showcase_sigma_'+str(sigma)+'.png', dpi = 400)
+#    plt.savefig('../Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.png', dpi = 400)
+#    plt.savefig('../Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.svg')
     
 if __name__ == "__main__":
     main()
