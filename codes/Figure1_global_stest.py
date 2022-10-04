@@ -49,7 +49,7 @@ def main():
     
     
     for name in names:
-        data = numpy.loadtxt(folder+'/'+name+'_rate_zoom=01.csv', delimiter=',')
+        data = numpy.loadtxt(folder+name+'_rate_zoom=01.csv', delimiter=',')
         coords = data[:,:2]
         forecast = data[:,4]
         print('Forecast Name:', name)
@@ -80,25 +80,25 @@ def main():
        
         # del forecast_gridded, forecast, r, data, coords
     
-    
+       
     ax = plot_poisson_consistency_test(stest_all, 
                                     normalize=True, one_sided_lower=True)
     # plot_args={'xlabel': 'Simulated log-likelihood - Observed log-likelihood', 'title': 'S-Test'}
-    ax.set_title('Global forecast experiment: S-test', fontsize=14)
-    ax.set_xlabel('Simulated log-likelihood - Observed log-likelihood')
+#    ax.set_title('Global forecast experiment: S-test', fontsize=14)
+    ax.set_xlabel('Simulated log-likelihood - Observed log-likelihood', fontsize=12)
     # fig.set_size_inches(32, 18)
     ax.figure.tight_layout()
-    ax.figure.savefig('../Figures/Figure1b_global_forecast_experiment.png', dpi = 200)
+    ax.figure.savefig('../Figures/Figure1b_global_forecast_experiment.png', dpi = 300)
     
     
-    ax2 = forecast_gridded.plot(set_global=True, plot_args={'cmap':'Oranges'})
-    ax2.set_title('Uniform forecast model', fontsize=16)
+    ax2 = forecast_gridded.plot(set_global=True) #, plot_args={'cmap':'Oranges'}
+#    ax2.set_title('Uniform forecast model', fontsize=16)
     
     # ax2.figure.savefig('Figure1a_Uniform_forecast.png', dpi=300)
     
     ax3 = catalog.plot(ax2, extent=[-180, 180, -90, 90], plot_args={'markercolor':'mediumblue'})
-    ax3.set_title('Uniform forecast model', fontsize=16)
-    ax3.figure.savefig('Figure1a_Uniform_forecast_cat.png', dpi=300)
+    ax3.get_legend().remove()
+    ax3.figure.savefig('../Figures/Figure1a_Uniform_forecast_cat.png', dpi=400)
     
 
     
@@ -112,27 +112,27 @@ if __name__ == "__main__":
     main()
     
 
-import numpy
-import pickle
-import pandas
-# from csep.core.regions import CartesianGrid2D
-# from csep.core.forecasts import GriddedForecast
-# from csep.core.catalogs import CSEPCatalog
-# from csep.utils.time_utils import decimal_year_to_utc_epoch
-# from csep.core.poisson_evaluations import spatial_test
-from csep.utils.plots import plot_poisson_consistency_test
-folder = '../Data/forecasts/'
-    
-#-- For Overall global test results
-with open(folder+'stest_01_all.dat', 'rb') as f:
-          reordered_results = pickle.load(f)
-reordered_results[1].sim_name = 'SHIFT_GSRM2f'
-ax =  plot_poisson_consistency_test(reordered_results, 
-                                plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, normalize=True, one_sided_lower=True)
-
-ax.set_title('Global forecast experiment: S-test', fontsize=14)
-ax.set_xlabel('Simulated log-likelihood - Observed log-likelihood')
-    # fig.set_size_inches(32, 18)
-ax.figure.tight_layout()
-ax.figure.savefig('../Figures/Figure1b_global_forecast_experiment.png', dpi = 200)
+#import numpy
+#import pickle
+#import pandas
+## from csep.core.regions import CartesianGrid2D
+## from csep.core.forecasts import GriddedForecast
+## from csep.core.catalogs import CSEPCatalog
+## from csep.utils.time_utils import decimal_year_to_utc_epoch
+## from csep.core.poisson_evaluations import spatial_test
+#from csep.utils.plots import plot_poisson_consistency_test
+#folder = '../Data/forecasts/'
+#    
+##-- For Overall global test results
+#with open(folder+'stest_01_all.dat', 'rb') as f:
+#          reordered_results = pickle.load(f)
+#reordered_results[1].sim_name = 'SHIFT_GSRM2f'
+#ax =  plot_poisson_consistency_test(reordered_results, 
+#                                plot_args={'xlabel': 'Log-Likelihood', 'title': 'S-Test'}, normalize=True, one_sided_lower=True)
+#
+##ax.set_title('Global forecast experiment: S-test', fontsize=14)
+#ax.set_xlabel('Simulated log-likelihood - Observed log-likelihood')
+#    # fig.set_size_inches(32, 18)
+#ax.figure.tight_layout()
+#ax.figure.savefig('../Figures/Figure1b_global_forecast_experiment.png', dpi = 200)
     

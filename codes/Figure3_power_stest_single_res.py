@@ -101,9 +101,9 @@ def main():
                                 'L9 (262144)', 'L10 (1048576)', 'L11 (4194304)'])
         
     fig, ax = plt.subplots()
-    ax.set_xlabel('Number of earthquakes in test catalogs',fontsize=18)
-    ax.set_ylabel('Number of cells in single-resolution grids', fontsize = 18)
-    ax.set_title('Statistical power of Spatial-test for single-resolution grids', fontsize=22)
+    ax.set_xlabel('Number of earthquakes in test catalogs',fontsize=16)
+    ax.set_ylabel('Number of cells in single-resolution grids', fontsize = 16)
+#    ax.set_title('Statistical power of Spatial-test for single-resolution grids', fontsize=22)
     
     im, cbar = utils.heatmap(power, row_name, col_eqs, ax=ax,
                        cmap="YlGn", cbarlabel="Power")
@@ -111,7 +111,7 @@ def main():
     
     fig.set_size_inches(32, 18)
     ax.figure.tight_layout()
-    fig.savefig('../Figures/Figure3_power_single_resolution_grids.png',  bbox_inches='tight')
+    fig.savefig('../Figures/Figure3_power_single_resolution_grids.png',  bbox_inches='tight', dpi =400)
     
     
 if __name__ == "__main__":

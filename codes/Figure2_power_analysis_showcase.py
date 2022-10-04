@@ -219,9 +219,9 @@ def main():
         plt.xlim(-Z, Z) #*sigma
         plt.xlabel('Bin mid-point position')
         plt.ylabel('Events per bin')
-        plt.title(titlename)
+#        plt.title(titlename)
         if grid == 'Uniform grid':
-            plt.legend(fontsize=12, loc = 'upper right')
+            plt.legend(fontsize=14, loc = 'upper right')
             ax.text(min(xb), max(max(model1), max(nobs)) -0.05, '(a)', fontsize=16)
         if grid == 'Density grid':
             ax.text(min(xb)-0.4, max(max(model0), max(nobs))-0.05, '(b)', fontsize=16)
@@ -271,10 +271,10 @@ def main():
     plt.plot(Ncell_all, power_cell[:,2], '--', c='b', label='Density Grid ($\sigma=%.1f$)'% (sigma_1))
     plt.plot(Ncell_all, power_cell_2[:,2], ':', c='b', label='Density Grid ($\sigma=%.1f$)'% (sigma_2))
     ax.set_xscale('log', basex=2)
-    plt.legend(fontsize=12,loc='center right')
-    plt.xlabel('$\mathrm{N_{cell}}$') #, fontsize = 14
+    plt.legend(fontsize=14,loc='center right')
+    plt.xlabel('$\mathrm{N_{cell}}$', fontsize = 14) #
     plt.ylabel('Power', fontsize = 14)  #, 
-    plt.title('$\mathregular{N_{cell}}$ vs Power ($\mathregular{N_{eq}=%.0f}$)' % (Neqs)) #, fontsize = 14
+#    plt.title('$\mathregular{N_{cell}}$ vs Power ($\mathregular{N_{eq}=%.0f}$)' % (Neqs)) #, fontsize = 14
     plt.xticks([ 2,  4,  8, 16, 32, 64],[2,  4,  8, 16, 32, 64])
     ax.text(2,0.95, '(c)', fontsize=16)
     ax.set_ylim(0,1.02)
@@ -295,16 +295,16 @@ def main():
     ax.set_xscale('log', basex=2)
     #plt.legend()
     plt.xlabel('$\mathrm{N_{eq}}$', fontsize = 16) #, 
-    plt.ylabel('Power') #, fontsize = 14
-    plt.title('$\mathregular{N_{eq}}$ vs Power ($\mathregular{N_{cell}=%.0f}$)' % (Ncell)) #, fontsize = 14
+    plt.ylabel('Power', fontsize = 14) #, 
+    #plt.title('$\mathregular{N_{eq}}$ vs Power ($\mathregular{N_{cell}=%.0f}$)' % (Ncell)) #, fontsize = 14
     plt.xticks([ 1,  2,  4,  8, 16, 32, 64],[ 1,  2,  4,  8, 16, 32, 64])
     ax.text(1,0.95, '(d)', fontsize=16)
     ax.set_ylim(0,1.02)
     
     
     plt.tight_layout()
-#    plt.savefig('../Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.png', dpi = 400)
-#    plt.savefig('../Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.svg')
+    plt.savefig('../Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.png', dpi = 400)
+    plt.savefig('../Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.svg')
     
 if __name__ == "__main__":
     main()
