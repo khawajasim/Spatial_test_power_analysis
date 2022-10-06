@@ -39,8 +39,15 @@ def main():
     
     run_simulations_again = input('Run Simulations again (Y/N) :')
     
+    if run_simulations_again =='Y' or run_simulations_again =='y':
+        results_folder = '../Data/results/'
+    else: 
+        results_folder = '../Data/generated_results/'
+    
+    
+    
     if run_simulations_again =='Y' or run_simulations_again == 'y':    
-        n_cat = 2 #00   
+        n_cat = 5 #00   
         for z in range(len(grid_fn)):        
             zoom_level = zoom[z]   
             print('Grid Zoom-level :',zoom_level)
@@ -86,13 +93,13 @@ def main():
                 print('------Power : ', power_value_N)
                 power_stest_zoom.append(numpy.array([zoom[z], N, power_value_N]))
     #        power_stest_zoom = numpy.row_stack((power_stest_zoom, [zoom[z], N, power_value_N]))
-            numpy.savetxt('../Data/power_stest/'+grid_fn[z]+'.csv', numpy.array(power_stest_zoom), delimiter=',')
+            numpy.savetxt(results_folder+grid_fn[z]+'.csv', numpy.array(power_stest_zoom), delimiter=',')
         
     print('--Plotting Power for Single-resolution grids')
     power = []
     for fn in grid_fn:
     #    print(fn)
-        pp = numpy.loadtxt('../Data/power_stest/'+fn+'.csv', delimiter =',')
+        pp = numpy.loadtxt(results_folder+fn+'.csv', delimiter =',')
         power.append(pp[:,2])
         
     power = numpy.array(power)
@@ -111,7 +118,7 @@ def main():
     
     fig.set_size_inches(32, 18)
     ax.figure.tight_layout()
-    fig.savefig('../Figures/Figure3_power_single_resolution_grids.png',  bbox_inches='tight', dpi =400)
+    fig.savefig('../Data/Figures/Figure3_power_single_resolution_grids.png',  bbox_inches='tight', dpi =400)
     
     
 if __name__ == "__main__":

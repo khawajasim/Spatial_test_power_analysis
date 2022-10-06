@@ -19,16 +19,6 @@ import utils
 
 def main():
     n_EQs = 2**numpy.arange(0,12) #16
-    #
-    ##Store above number of earthquakes for each Grid in a Dictionary. 
-    #grid = {"L01":n_EQs
-    #        }
-    
-    
-    #folder = ['L5_power', 'L6_power', 'L7_power', 'L8_power', 'L9_power', 'L10_power', 'L11_power' ]
-    #folder = 'catalogs_gear_forecast'
-    
-    
     mbins = numpy.array([5.95])
     n_cat = 10
     
@@ -36,12 +26,15 @@ def main():
     
     #forecast_path = '/home/khawaja/GFZ/Testing forecasts/global testing experiment/forecasts/GEAR1/'
     forecast_path = '../Data/forecasts/'
-    # names = ['Uniform', 'WHEEL', 'KJSS', 'SHIFT2F_GSRM', 'TEAMr', 'GEAR1'  ] 
-    #names = ['5','9','6','7','EQ100L11','EQ50L11','EQ25L11','EQ10L11','EQ5L11','EQ1L11','8','9','10'  ]
     names = ['N100L11','N50L11','N25L11','N10L11','N5L11', 'N1L11']
-    #names = ['EQ1L11']
+
     
     run_simulations_again = input('Run Simulations again (Y/N) :')
+    
+    if run_simulations_again =='Y' or run_simulations_again =='y':
+        results_folder = '../Data/results/'
+    else: 
+        results_folder = '../Data/generated_results/'
     
     if run_simulations_again =='Y' or run_simulations_again == 'y':  
         
@@ -50,10 +43,8 @@ def main():
             print('-----------', name)
             print(forecast_path+'GEAR1_rate_zoom='+name+'.csv')
             data = numpy.loadtxt(forecast_path+'GEAR1_rate_zoom='+name+'.csv', delimiter=',')
-    #        coords = data[:,:2]
-    #        qk_path = '/home/khawaja/GFZ/Testing forecasts/global testing experiment/grids/qk_zoom='+name+'.txt'
             qk_path = '../Data/grids/qk_zoom='+name+'.txt'
-            print('Quadkeys :', qk_path)
+            print('Grid path :', qk_path)
             qk = numpy.genfromtxt(qk_path, dtype = 'str')
             r =QuadtreeGrid2D.from_quadkeys(qk, magnitudes=mbins)        
     #        fcst = data[:,4]
@@ -84,13 +75,6 @@ def main():
                     dfcat['origin_time'] = dfcat.apply(lambda row: decimal_year_to_utc_epoch(row.year), axis=1) #----
                     
                     catalog = CSEPCatalog.from_dataframe(dfcat)
-    #                print(catalog)
-                    
-                    #Generate uniform forecast
-    #                fcst = (r.cell_area/ sum(r.cell_area)) * catalog.event_count
-    #                print('sum forecast =', forecast.sum())
-                    
-                    
                     catalog.region = forecast.region
                     stest = spatial_test(forecast, catalog, verbose=False, seed = 123456)
     #                plot_poisson_consistency_test([stest], 
@@ -106,17 +90,15 @@ def main():
     
                 power_value_N = stest_fail_N / n_cat
                 print('------Power : ', power_value_N)
-    #           numpy.savetxt(path+'power_value.txt', [power_value_N])      
-    #            power_stest_zoom = numpy.row_stack((power_stest_zoom, [0.1, N, power_value_N]))
                 power_stest_zoom.append(numpy.array([N, power_value_N])) #[zoom[z], 
-            numpy.savetxt('../Data/power_stest/GEAR_aggregation_zoom='+name+'.csv', power_stest_zoom, delimiter=',')
+            numpy.savetxt(results_folder+'GEAR_aggregation_zoom='+name+'.csv', power_stest_zoom, delimiter=',')
      
     #Generate spatial grid 
-    print('--Plotting Power for Single-resolution grids')
+#    print('--Plotting Power for Single-resolution grids')
     power = []
     for name in names:
     #    print(fn)
-        pp = numpy.loadtxt('../Data/power_stest/GEAR_aggregation_zoom='+name+'.csv', delimiter =',')
+        pp = numpy.loadtxt(results_folder+'GEAR_aggregation_zoom='+name+'.csv', delimiter =',')
         power.append(pp[1:,1])
         
     power = (1 - numpy.array(power)) #Calculating Pass-ratio
@@ -135,7 +117,7 @@ def main():
     
     fig.set_size_inches(32, 18)
     ax.figure.tight_layout()
-    fig.savefig('../Figures/Figure5_GEAR1_aggregations_pass_ratio.png',  bbox_inches='tight', dpi = 400)
+    fig.savefig('../Data/Figures/Figure5_GEAR1_aggregations_pass_ratio.png',  bbox_inches='tight', dpi = 400)
     
 if __name__ == "__main__":
     main()

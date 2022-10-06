@@ -140,6 +140,14 @@ def main():
 #    Nsim = input("Choose the number of simulations (By Default 1000): ")
 #    Nsim = int(Nsim)
     sigmas = [sigma_1, sigma_2]
+    
+    #Results folder name, where to look for results.
+    if run_sim =='Y' or run_sim =='y':
+        results_folder = '../Data/results/power_analysis_showcase/'
+    else: 
+        results_folder = '../Data/generated_results/power_analysis_showcase/'
+        
+        
     if run_sim == 'Y' or run_sim == 'y':   
         for sigma in sigmas:
             for Nc2 in Nc2_all:
@@ -148,7 +156,7 @@ def main():
                 print('Uniform grid size :', len(uniformbinedges)-1) 
                 densitybinedges = gaussian_binedges(Z, Nc2, mu, sigma_1) 
                 
-                outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, 2*Nc2, Nsim,sigma)
+                outname = results_folder+'powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, 2*Nc2, Nsim,sigma)
                 f = open(outname, 'w')
                 f.write('# N    power_uniformgrid   power_densitygrid\n')
                 f.close()
@@ -186,7 +194,7 @@ def main():
     plt.rc('font', family='sans-serif')
     plt.rc('legend', fontsize=14)
     plt.rc('axes', labelsize=16)
-    fig = plt.figure(1, figsize=(18, 10))
+    fig = plt.figure(1, figsize=(35, 35))
     plt.subplots_adjust(hspace=0.3, wspace=0.3)
     
     Nc2 = int(Ncell_fix/2) # 10
@@ -245,7 +253,7 @@ def main():
     power_cell_2 = np.array([0,0,0])
     for Ncell in Ncell_all:
     #    print('---Number of Cells :', Ncell)
-        outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim,sigma_1) #Z=3
+        outname = results_folder+'powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim,sigma_1) #Z=3
         data = np.loadtxt(outname, skiprows=1)
         #The below IF is for the reduced computations we did to reduce computations only to the values we need for figure.
         if data.ndim == 2:
@@ -254,7 +262,7 @@ def main():
             power_cell = np.row_stack((power_cell,data))
     
         #Data 2---
-        outname_2 = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim,sigma_2) #Z=3
+        outname_2 = results_folder+'powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim,sigma_2) #Z=3
         data_2 = np.loadtxt(outname_2, skiprows=1)
         #The below IF is for the reduced computations we did to reduce computations only to the values we need for figure.
         if data_2.ndim == 2:
@@ -283,10 +291,10 @@ def main():
     #Frame d ---- Neqs vs Power -- Using Fixed Ncells
     ax = plt.subplot2grid((2,2), (1,1), colspan=1, rowspan=1)
     Ncell = 2*Nc2
-    outname = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell,Nsim, sigma_1) #Z=3
+    outname = results_folder+'powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell,Nsim, sigma_1) #Z=3
     data = np.loadtxt(outname, skiprows=1)
     
-    outname_2 = '../Data/power_analysis_showcase/powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim, sigma_2) #Z=3
+    outname_2 = results_folder+'powertest-Z%.0f-Ncell%.0f-Nsim%d-sigma%.1f.out' % (Z, Ncell, Nsim, sigma_2) #Z=3
     data_2 = np.loadtxt(outname_2, skiprows=1)
     
     plt.plot(data[:,0], data[:,1], c='k', label='Unifrom Grid')
@@ -300,11 +308,9 @@ def main():
     plt.xticks([ 1,  2,  4,  8, 16, 32, 64],[ 1,  2,  4,  8, 16, 32, 64])
     ax.text(1,0.95, '(d)', fontsize=16)
     ax.set_ylim(0,1.02)
-    
-    
     plt.tight_layout()
-    plt.savefig('../Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.png', dpi = 400)
-    plt.savefig('../Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.svg')
+    plt.savefig('../Data/Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.png', dpi = 400)
+    plt.savefig('../Data/Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.svg')
     
 if __name__ == "__main__":
     main()

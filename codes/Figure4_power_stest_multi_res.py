@@ -34,9 +34,15 @@ def main():
     
     run_simulations_again = input('Run Simulations again (Y/N) :')
     
+    
+    if run_simulations_again =='Y' or run_simulations_again =='y':
+        results_folder = '../Data/results/'
+    else: 
+        results_folder = '../Data/generated_results/'
+    
     if run_simulations_again =='Y' or run_simulations_again == 'y':  
     
-        n_cat = 100
+        n_cat = 10
     
         #os.mkdir('power_stest_grids_GEAR_multi_res')
     
@@ -88,7 +94,7 @@ def main():
                 print('------Power : ', power_value_N)
     #            power_stest_zoom = numpy.row_stack((power_stest_zoom, [N, power_value_N]))
                 power_stest_zoom.append(numpy.array([N, power_value_N])) #zoom[z],
-            numpy.savetxt('../Data/power_stest/'+grid_fn[z]+'.csv', numpy.array(power_stest_zoom), delimiter=',')
+            numpy.savetxt(results_folder+grid_fn[z]+'.csv', numpy.array(power_stest_zoom), delimiter=',')
     #        numpy.savetxt('power_stest_grids_GEAR_multi_res/'+grid_fn[z]+'.csv', power_stest_zoom, delimiter=',')
      
     #Generate spatial grid 
@@ -97,7 +103,7 @@ def main():
     power = []
     for fn in grid_fn:
     #    print(fn)
-        pp = numpy.loadtxt('../Data/power_stest/'+fn+'.csv', delimiter =',')
+        pp = numpy.loadtxt(results_folder+fn+'.csv', delimiter =',')
         power.append(pp[:,1])
         
     power = numpy.array(power)
@@ -116,7 +122,7 @@ def main():
     
     fig.set_size_inches(32, 18)
     ax.figure.tight_layout()
-    fig.savefig('../Figures/Figure4_power_multi_resolution_grids.png',  bbox_inches='tight', dpi=400)
+    fig.savefig('../Data/Figures/Figure4_power_multi_resolution_grids.png',  bbox_inches='tight', dpi=400)
     
 if __name__ == "__main__":
     main()
