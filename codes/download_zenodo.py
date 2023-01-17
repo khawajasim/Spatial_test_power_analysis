@@ -10,6 +10,22 @@ import requests
 import sys
 import json
 import os
+import hashlib
+
+
+def check_hash(filename, checksum):
+    algorithm, value = checksum.split(':')
+    if not os.path.exists(filename):
+        return value, 'invalid'
+    h = hashlib.new(algorithm)
+    with open(filename, 'rb') as f:
+        while True:
+            data = f.read(4096)
+            if not data:
+                break
+            h.update(data)
+    digest = h.hexdigest()
+    return value, digest
 
 
 def download_file(url, filename):
@@ -44,17 +60,23 @@ filename =  '../data'
 r = requests.get(link)
 
 download_url = [f['links']['self'] for f in r.json()['files']]
-filenames = [f['key'] for f in r.json()['files']]
+# filenames = [f['key'] for f in r.json()['files']]
+filenames = [(f['key'], f['checksum']) for f in r.json()['files']]
 
 
-for fname, url in zip(filenames, download_url):
+for (fname, checksum), url in zip(filenames, download_url):
     print(url)
-    print(fname)
-    
-    
+    print(fname)  
+    print(checksum)
+    # os.makedirs(dir_map[fname])
     folder_for_download =  os.path.join('../', fname)
-    
     #full_path = os.path.join(dir_map[fname], fname)
-
-    download_file(download_url, folder_for_download)
-
+    download_file(url, folder_for_download)
+    
+    
+    value, digest = check_hash(folder_for_download, checksum)
+    if value != digest:
+       print("Error: Checksum does not match.")
+       sys.exit(-1)
+    
+    # r = requests.get(url)
