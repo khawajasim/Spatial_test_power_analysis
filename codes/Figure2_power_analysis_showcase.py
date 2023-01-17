@@ -308,7 +308,7 @@ def main():
     plt.xticks([ 1,  2,  4,  8, 16, 32, 64],[ 1,  2,  4,  8, 16, 32, 64])
     ax.text(1,0.95, '(d)', fontsize=16)
     ax.set_ylim(0,1.02)
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.savefig('../Data/Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.png', dpi = 400)
     plt.savefig('../Data/Figures/Figure2_stest_power_showcase_sigma_'+str(sigma_1)+'_'+str(sigma_2)+'.svg')
     

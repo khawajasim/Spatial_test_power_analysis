@@ -101,10 +101,11 @@ def main():
         ax.figure.savefig('../Data/Figures/Figure1b_global_forecast_experiment.png', dpi = 300)
         
         #Since last forecast is Unifrom, so it will only plot uniform model.
-        ax2 = forecast_gridded.plot(set_global=True)
-        ax3 = catalog.plot(ax2, extent=[-180, 180, -90, 90], plot_args={'markercolor':'mediumblue'})
-        ax3.get_legend().remove()
-        ax3.figure.savefig('../Data/Figures/Figure1a_Uniform_forecast_cat.png', dpi=400)
+        #--This figure is removed from the manuscript as per reviewers suggestion.
+#        ax2 = forecast_gridded.plot(set_global=True)
+#        ax3 = catalog.plot(ax2, extent=[-180, 180, -90, 90], plot_args={'markercolor':'mediumblue'})
+#        ax3.get_legend().remove()
+#        ax3.figure.savefig('../Data/Figures/Figure1a_Uniform_forecast_cat.png', dpi=400)
     
 
     
